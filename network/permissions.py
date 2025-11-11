@@ -3,8 +3,7 @@ from rest_framework import permissions
 
 class IsActiveStaffEmployee(permissions.BasePermission):
     """
-    Доступ к API только для активных сотрудников (залогиненных пользователей),
-    у которых is_active=True и is_staff=True.
+    Доступ только для активных сотрудников
     """
     def has_permission(self, request, view):
         user = request.user

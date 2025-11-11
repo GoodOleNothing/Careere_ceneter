@@ -9,21 +9,26 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class NetworkNodeSerializer(serializers.ModelSerializer):
-    # вложённые продукты — при желании можно включать/исключать
-    products = ProductSerializer(many=True, read_only=True)
-
     class Meta:
         model = NetworkNode
         fields = [
             'id', 'name',
             'email', 'country', 'city', 'street', 'house_number',
-            'supplier', 'debt', 'created_at', 'level', 'products'
+            'supplier', 'debt', 'created_at', 'level'
         ]
-        read_only_fields = ('created_at', 'level')  # readonly auto-поля
+        read_only_fields = ('created_at', 'level')
 
     def validate(self, data):
-        # Простейшая валидация: если указан supplier, он не должен быть самим собой (в create pk нет)
-        supplier = data.get('supplier') or getattr(self.instance, 'supplier', None)
-        if self.instance and supplier and supplier.pk == self.instance.pk:
-            raise serializers.ValidationError("Поставщик не может быть самим собой.")
+        supplier = data.get("supplier") or getattr(self.instance, "supplier", None)
+
+        if supplier:
+            level = (supplier.level or 0) + 1
+        else:
+            level = 0
+
+        if level > 2:
+            raise serializers.ValidationError(
+                {"supplier": "Узел не может быть выше уровня 2"}
+            )
+
         return data

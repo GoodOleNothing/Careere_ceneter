@@ -43,7 +43,6 @@ class NetworkNodeAdmin(admin.ModelAdmin):
         return '-'
     supplier_link.short_description = 'Поставщик (ссылка)'
 
-    # readonly field для отображения ссылки в форме просмотра/редактирования
     def supplier_link_readonly(self, obj):
         return self.supplier_link(obj)
     supplier_link_readonly.short_description = 'Поставщик (ссылка)'

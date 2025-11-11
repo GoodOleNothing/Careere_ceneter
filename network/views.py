@@ -11,22 +11,21 @@ class NetworkNodeViewSet(viewsets.ModelViewSet):
     serializer_class = NetworkNodeSerializer
     permission_classes = [IsActiveStaffEmployee]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['country']  # фильтрация по определенной стране
+    filterset_fields = ['country']
 
+    # запрет на изменение debt через API, если в request.data есть debt
     def perform_update(self, serializer):
-        # запрет на изменение debt через API: если в request.data есть debt — игнорируем
         data = serializer.validated_data.copy()
         if 'debt' in data:
             data.pop('debt', None)
         serializer.save(**data)
 
-    # Применим то же для partial_update
     def partial_update(self, request, *args, **kwargs):
-        # обеспечиваем, что debt не будет применён
-        mutable_data = request.data.copy()
-        mutable_data.pop('debt', None)
-        request._full_data = mutable_data  # заменяем данные запроса перед сериализацией
+        mutate_data = request.data.copy()
+        mutate_data.pop('debt', None)
+        request._full_data = mutate_data
         return super().partial_update(request, *args, **kwargs)
+
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.select_related('node').all()
@@ -34,6 +33,3 @@ class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [IsActiveStaffEmployee]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['node__country', 'node__city', 'release_date']
-from django.shortcuts import render
-
-# Create your views here.
